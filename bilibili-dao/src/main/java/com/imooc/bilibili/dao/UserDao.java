@@ -16,4 +16,8 @@ public interface UserDao {
     User getUserById(Long userId);
 
     UserInfo getUserInfoById(Long userId);
+
+    Integer updateUserInfo(UserInfo userInfo);
+
+    Integer updateUser(User user);
 }

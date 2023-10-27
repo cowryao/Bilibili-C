@@ -89,4 +89,35 @@ public class UserService {
         user.setUserInfo(userInfo);
         return user;
     }
+
+    public void updateUserInfo(UserInfo userInfo) {
+        userInfo.setUpdateTime(new Date());
+        userDao.updateUserInfo(userInfo);
+
+    }
+
+    public void updateUser(User user) throws Exception {
+        Long id = user.getId();
+        User dbUser = userDao.getUserById(id);
+        if(dbUser == null){
+            throw new ConditionException("当前用户不存在！");
+        }
+        // Check and update phone
+        if(!StringUtils.isNullOrEmpty(user.getPhone())) {
+            dbUser.setPhone(user.getPhone());
+        }
+        // Check and update email
+        if(!StringUtils.isNullOrEmpty(user.getEmail())) {
+            dbUser.setEmail(user.getEmail());
+        }
+        // Check and update password
+        if(!StringUtils.isNullOrEmpty(user.getPassword())){
+            String rawPassword = RSAUtil.decrypt(user.getPassword());
+            String md5Password = MD5Util.sign(rawPassword, dbUser.getSalt(),"UTF-8");
+            user.setPassword(md5Password);
+        }
+        user.setUpdateTime(new Date());
+        userDao.updateUser(user);
+
+    }
 }
