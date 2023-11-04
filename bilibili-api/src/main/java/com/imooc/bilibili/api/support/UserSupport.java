@@ -1,5 +1,6 @@
 package com.imooc.bilibili.api.support;
 
+import com.imooc.bilibili.domain.auth.UserAuthorities;
 import com.imooc.bilibili.service.util.TokenUtil;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -18,4 +19,6 @@ public class UserSupport {
         return userId;
 
     }
+
+
 }
