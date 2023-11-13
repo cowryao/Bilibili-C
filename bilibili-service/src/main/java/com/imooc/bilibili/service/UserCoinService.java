@@ -5,6 +5,7 @@ import com.imooc.bilibili.dao.UserCoinDao;
 import org.springframework.stereotype.Service;
 import java.util.Date;
 
+@Service
 public class UserCoinService {
 
     @Autowired

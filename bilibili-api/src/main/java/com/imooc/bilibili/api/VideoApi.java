@@ -1,12 +1,13 @@
 package com.imooc.bilibili.api;
 
+
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.imooc.bilibili.api.support.UserSupport;
 import com.imooc.bilibili.domain.*;
-
+import com.imooc.bilibili.service.ElasticSearchService;
 import com.imooc.bilibili.service.VideoService;
-
+import org.apache.mahout.cf.taste.common.TasteException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,11 +25,19 @@ public class VideoApi {
     @Autowired
     private UserSupport userSupport;
 
+    @Autowired
+    private ElasticSearchService elasticSearchService;
+
+    /*
+    视频投稿
+     */
     @PostMapping("/videos")
     public JsonResponse<String> addVideos(@RequestBody Video video) throws Exception {
         Long userId = userSupport.getCurrentUserId();
         video.setUserId(userId);
         videoService.addVideo(video);
+        //在es中添加一条视频数据
+        elasticSearchService.addVideo(video);
         return JsonResponse.success("添加成功");
     }
 
@@ -190,58 +199,58 @@ public class VideoApi {
         return new JsonResponse<>(count);
     }
 
-//    /**
-//     * 视频内容推荐
-//     */
-//    @GetMapping("/recommendations")
-//    public JsonResponse<List<Video>> recommend() throws TasteException {
-//        Long userId = userSupport.getCurrentUserId();
-//        List<Video> list = videoService.recommend(userId);
-//        return new JsonResponse<>(list);
-//    }
-//
-//    /**
-//     * 视频帧截取生成黑白剪影
-//     */
-//    @GetMapping("/video-frames")
-//    public JsonResponse<List<VideoBinaryPicture>> captureVideoFrame(@RequestParam Long videoId,
-//                                                                    @RequestParam String fileMd5) throws Exception {
-//        List<VideoBinaryPicture> list = videoService.convertVideoToImage(videoId, fileMd5);
-//        return new JsonResponse<>(list);
-//    }
-//
-//    /**
-//     * 查询视频黑白剪影
-//     */
-//    @GetMapping("/video-binary-images")
-//    public JsonResponse<List<VideoBinaryPicture>> getVideoBinaryImages(@RequestParam Long videoId,
-//                                                                       Long videoTimestamp,
-//                                                                       String frameNo) {
-//        Map<String, Object> params = new HashMap<>();
-//        params.put("videoId", videoId);
-//        params.put("videoTimestamp", videoTimestamp);
-//        params.put("frameNo", frameNo);
-//        List<VideoBinaryPicture> list = videoService.getVideoBinaryImages(params);
-//        return new JsonResponse<>(list);
-//    }
-//
-//    /**
-//     * 查询视频标签
-//     */
-//    @GetMapping("/video-tags")
-//    public JsonResponse<List<VideoTag>> getVideoTagsByVideoId(@RequestParam Long videoId) {
-//        List<VideoTag> list = videoService.getVideoTagsByVideoId(videoId);
-//        return new JsonResponse<>(list);
-//    }
-//
-//    /**
-//     * 删除视频标签
-//     */
-//    @DeleteMapping("/video-tags")
-//    public JsonResponse<String> deleteVideoTags(@RequestBody JSONObject params) {
-//        String tagIdList = params.getString("tagIdList");
-//        Long videoId = params.getLong("videoId");
-//        videoService.deleteVideoTags(JSONArray.parseArray(tagIdList).toJavaList(Long.class), videoId);
-//        return JsonResponse.success();
-//    }
+    /**
+     * 视频内容推荐
+     */
+    @GetMapping("/recommendations")
+    public JsonResponse<List<Video>> recommend() throws Exception {
+        Long userId = userSupport.getCurrentUserId();
+        List<Video> list = videoService.recommend(userId);
+        return new JsonResponse<>(list);
+    }
+
+    /**
+     * 视频帧截取生成黑白剪影
+     */
+    @GetMapping("/video-frames")
+    public JsonResponse<List<VideoBinaryPicture>> captureVideoFrame(@RequestParam Long videoId,
+                                                                    @RequestParam String fileMd5) throws Exception {
+        List<VideoBinaryPicture> list = videoService.convertVideoToImage(videoId, fileMd5);
+        return new JsonResponse<>(list);
+    }
+
+    /**
+     * 查询视频黑白剪影
+     */
+    @GetMapping("/video-binary-images")
+    public JsonResponse<List<VideoBinaryPicture>> getVideoBinaryImages(@RequestParam Long videoId,
+                                                                       Long videoTimestamp,
+                                                                       String frameNo) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("videoId", videoId);
+        params.put("videoTimestamp", videoTimestamp);
+        params.put("frameNo", frameNo);
+        List<VideoBinaryPicture> list = videoService.getVideoBinaryImages(params);
+        return new JsonResponse<>(list);
+    }
+
+    /**
+     * 查询视频标签
+     */
+    @GetMapping("/video-tags")
+    public JsonResponse<List<VideoTag>> getVideoTagsByVideoId(@RequestParam Long videoId) {
+        List<VideoTag> list = videoService.getVideoTagsByVideoId(videoId);
+        return new JsonResponse<>(list);
+    }
+
+    /**
+     * 删除视频标签
+     */
+    @DeleteMapping("/video-tags")
+    public JsonResponse<String> deleteVideoTags(@RequestBody JSONObject params) {
+        String tagIdList = params.getString("tagIdList");
+        Long videoId = params.getLong("videoId");
+        videoService.deleteVideoTags(JSONArray.parseArray(tagIdList).toJavaList(Long.class), videoId);
+        return JsonResponse.success();
+    }
 }
